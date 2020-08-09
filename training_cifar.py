@@ -95,7 +95,7 @@ model = models.resnet18(num_classes=10)
 #         nn.Linear(4096, 10),
 # )
 # model = models.resnet18(num_classes=10)
-model.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
 
 if use_multiGPU:
     if torch.cuda.device_count() > 1:
@@ -105,7 +105,7 @@ if use_multiGPU:
 model.to(device)
 
 experiment_signature = model.__class__.__name__ + " lr=" + str(learning_rate) + " bs=" + str(
-    batch_size) + " reg=" + str(weight_decay)
+        batch_size) + " reg=" + str(weight_decay)
 print(experiment_signature)
 
 if enable_tensorboard:
@@ -159,10 +159,12 @@ if enable_tensorboard:
 
 print("------ Training finished ------")
 print("Best validation set accuracy: " + str(best_acc * 100))
-
-# Results on Test
+print("plotting confusion matrix...")
+# Results on validation set
 
 validation_loader = torch.utils.data.DataLoader(val_set, batch_size=1, shuffle=False, num_workers=num_worker)
+model.load_state_dict(torch.load(model._get_name() + '_checkpoint_best.pth.tar'))
+model.to(device)
 model.eval()
 
 y_true = []
