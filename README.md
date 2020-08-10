@@ -10,5 +10,7 @@
 * Optuna HParam search framework is used to find best parameters
 
 ![Confusion Matrix](img/cm_resnet18.png)
+
+### Training and Validation Sets Accuracies for ResNet18
 ![accuracies](img/accuracies.svg)
 
