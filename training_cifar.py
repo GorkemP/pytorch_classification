@@ -85,16 +85,6 @@ def validation(model, device, val_loader, criterion):
     return (val_loss, correct)
 
 model = models.resnet18(num_classes=10)
-# model.classifier = nn.Sequential(
-#         nn.Linear(512 * 7 * 7, 4096),
-#         nn.ReLU(True),
-#         nn.Dropout(),
-#         nn.Linear(4096, 4096),
-#         nn.ReLU(True),
-#         nn.Dropout(),
-#         nn.Linear(4096, 10),
-# )
-# model = models.resnet18(num_classes=10)
 model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
 
 if use_multiGPU:
