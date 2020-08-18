@@ -1,4 +1,3 @@
-
 def plot_confusion_matrix(cm,
                           target_names,
                           title='Confusion matrix',
@@ -31,7 +30,7 @@ def plot_confusion_matrix(cm,
                           target_names = y_labels_vals,       # list of names of the classes
                           title        = best_estimator_name) # title of graph
 
-    Citiation
+    Citation
     ---------
     http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 
@@ -59,7 +58,6 @@ def plot_confusion_matrix(cm,
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
-
     thresh = cm.max() / 1.5 if normalize else cm.max() / 2
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         if normalize:
@@ -71,10 +69,40 @@ def plot_confusion_matrix(cm,
                      horizontalalignment="center",
                      color="white" if cm[i, j] > thresh else "black")
 
-
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
     plt.show()
 
+def initialize_model(model_name, pretrained, num_classes):
+    import torch
+    import torchvision.models as models
 
+    model = None
+
+    if model_name == "VGG":
+        if pretrained:
+            model = models.vgg16_bn(pretrained=True)
+        else:
+            model = models.vgg16_bn()
+        in_features = model.classifier[6].in_features
+        model.classifier[6] = torch.nn.Linear(in_features, num_classes)
+    elif model_name == "ResNet":
+        if pretrained:
+            model = models.resnet18(pretrained=True)
+        else:
+            model = models.resnet18()
+        in_features = model.fc.in_features
+        model.fc = torch.nn.Linear(in_features, num_classes)
+    elif model_name == "DenseNet":
+        if pretrained:
+            model = models.densenet121(pretrained=True)
+        else:
+            model = models.densenet121()
+        in_features = model.classifier.in_features
+        model.classifier = torch.nn.Linear(in_features, num_classes)
+    else:
+        print("Invalid model name!")
+        exit()
+
+    return model

@@ -9,7 +9,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 from datetime import datetime
 import time
-from utils import plot_confusion_matrix
+from utils import plot_confusion_matrix, initialize_model
 
 torch.manual_seed(35)
 torch.backends.cudnn.deterministic = True
@@ -19,13 +19,14 @@ learning_rate = 0.01
 num_epoch = 200
 best_acc = 0
 batch_size = 128
-weight_decay = 0.005
+weight_decay = 0.01
 best_threshold = 0.0002
 num_worker = 4
 early_stop_counter = 0
 early_stoping_thres = 20
 use_multiGPU = False
 enable_tensorboard = True
+pretrained_weights = True
 
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("device: ", device)
@@ -84,8 +85,7 @@ def validation(model, device, val_loader, criterion):
 
     return (val_loss, correct)
 
-model = models.resnet18(num_classes=10)
-model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+model = initialize_model("VGG", pretrained_weights, 10)
 
 if use_multiGPU:
     if torch.cuda.device_count() > 1:
