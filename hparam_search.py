@@ -74,20 +74,20 @@ def validation(model, device, val_loader, criterion):
 
     return (val_loss, correct)
 
-model = models.resnet18(num_classes=10)
-# 7x7 convolution is too much for CIFAR where images are 32x32 pixel
-model.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
-
-if use_multiGPU:
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model)
-
-model.to(device)
-
 print("Start: " + datetime.now().strftime("%d-%m-%Y (%H:%M)"))
 
 def objective(trial):
+    model = models.resnet18(num_classes=10)
+    # 7x7 convolution is too much for CIFAR where images are 32x32 pixel
+    model.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+
+    if use_multiGPU:
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            model = nn.DataParallel(model)
+
+    model.to(device)
+
     early_stop_counter = 0
     best_acc = 0
     optimizer = torch.optim.SGD(model.parameters(), lr=trial.suggest_loguniform("lr", 1e-5, 1), momentum=0.9,
