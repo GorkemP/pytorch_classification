@@ -1,3 +1,5 @@
+
+
 def plot_confusion_matrix(cm,
                           target_names,
                           title='Confusion matrix',
@@ -87,14 +89,16 @@ def initialize_model(model_name, pretrained, num_classes):
             model = models.vgg16_bn()
         in_features = model.classifier[6].in_features
         model.classifier[6] = torch.nn.Linear(in_features, num_classes)
-    elif model_name == "ResNet":
+
+    elif model_name == "ResNet18":
         if pretrained:
             model = models.resnet18(pretrained=True)
         else:
             model = models.resnet18()
         in_features = model.fc.in_features
         model.fc = torch.nn.Linear(in_features, num_classes)
-    elif model_name == "DenseNet":
+
+    elif model_name == "DenseNet121":
         if pretrained:
             model = models.densenet121(pretrained=True)
         else:
