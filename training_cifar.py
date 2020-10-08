@@ -15,18 +15,19 @@ torch.manual_seed(35)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-learning_rate = 0.01
+learning_rate = 0.0001
 num_epoch = 200
 best_acc = 0
 batch_size = 128
-weight_decay = 0.01
+weight_decay = 0.0001
 best_threshold = 0.0002
 num_worker = 4
 early_stop_counter = 0
 early_stoping_thres = 20
 use_multiGPU = False
 enable_tensorboard = True
-pretrained_weights = True
+pretrained_weights = True # using pretrained weights directly affects learning rate
+model_name = "ResNet18"
 
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("device: ", device)
@@ -85,7 +86,7 @@ def validation(model, device, val_loader, criterion):
 
     return (val_loss, correct)
 
-model = initialize_model("VGG", pretrained_weights, 10)
+model = initialize_model(model_name, pretrained_weights, 10)
 
 if use_multiGPU:
     if torch.cuda.device_count() > 1:
@@ -94,7 +95,7 @@ if use_multiGPU:
 
 model.to(device)
 
-experiment_signature = model.__class__.__name__ + " lr=" + str(learning_rate) + " bs=" + str(
+experiment_signature = model_name + " lr=" + str(learning_rate) + " bs=" + str(
         batch_size) + " reg=" + str(weight_decay)
 print(experiment_signature)
 
@@ -131,7 +132,7 @@ for epoch in range(num_epoch):
         early_stop_counter = 0
         best_acc = val_accuracy
         print("overwriting the best model!")
-        torch.save(model.state_dict(), model._get_name() + '_checkpoint_best.pth.tar')
+        torch.save(model.state_dict(), 'best_'+model_name + '.pth.tar')
     else:
         early_stop_counter += 1
 
@@ -140,7 +141,7 @@ for epoch in range(num_epoch):
         break
 
 if enable_tensorboard:
-    writer.add_hparams({'model': model.__class__.__name__, 'lr': learning_rate, 'batch size': batch_size,
+    writer.add_hparams({'model': model_name, 'lr': learning_rate, 'batch size': batch_size,
                         "epoch": last_epoch, "optimizer": optimizer.__class__.__name__},
                        {'accuracy': best_acc * 100})
 
@@ -153,7 +154,7 @@ print("plotting confusion matrix...")
 # Results on validation set
 
 validation_loader = torch.utils.data.DataLoader(val_set, batch_size=1, shuffle=False, num_workers=num_worker)
-model.load_state_dict(torch.load(model._get_name() + '_checkpoint_best.pth.tar'))
+model.load_state_dict(torch.load('best_'+model_name + '.pth.tar'))
 model.to(device)
 model.eval()
 
